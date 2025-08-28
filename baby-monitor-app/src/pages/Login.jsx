@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -17,13 +20,15 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      alert("Please enter both email and password!");
+    if (!formData.username || !formData.password) {
+      alert("Please enter both username and password!");
       return;
     }
 
     alert("Login successful!");
     console.log("Logged in with:", formData);
+
+    navigate("/dashboard");
   };
 
   return (
@@ -31,10 +36,10 @@ function Login() {
       <h2 className="login-title">Parent Login</h2>
       <form onSubmit={handleSubmit} className="login-form">
         <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={formData.email}
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={formData.username}
           onChange={handleChange}
           className="login-input"
           required
@@ -54,6 +59,16 @@ function Login() {
           Login
         </button>
       </form>
+
+      <p className="register-link">
+        Don’t have an account?{" "}
+        <button
+          onClick={() => navigate("/register")}
+          className="register-btn"
+        >
+          Register
+        </button>
+      </p>
     </div>
   );
 }

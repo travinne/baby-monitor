@@ -1,12 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const [formData, setFormData] = useState({
-    fullName: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,8 +27,11 @@ function Register() {
       return;
     }
 
+    localStorage.setItem("user", JSON.stringify(formData));
+
     alert("Registration successful!");
-    console.log(formData);
+
+    navigate("/dashboard");
   };
 
   return (
@@ -34,9 +40,9 @@ function Register() {
       <form onSubmit={handleSubmit} className="register-form">
         <input
           type="text"
-          name="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
+          name="username"
+          placeholder="Username"
+          value={formData.username}
           onChange={handleChange}
           className="register-input"
           required
