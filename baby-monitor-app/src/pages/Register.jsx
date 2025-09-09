@@ -30,21 +30,22 @@ function Register() {
     localStorage.setItem("user", JSON.stringify(formData));
 
     alert("Registration successful!");
-
     navigate("/dashboard");
   };
 
   return (
-    <div className="register">
-      <h2 className="register-title">Parent Registration</h2>
-      <form onSubmit={handleSubmit} className="register-form">
+    <div className="auth">
+      <form onSubmit={handleSubmit} className="auth-form">
+        <h2 className="auth-title">Parent Registration</h2>
+        <p className="auth-subtitle">Create your account to access the dashboard</p>
+
         <input
           type="text"
           name="username"
           placeholder="Username"
           value={formData.username}
           onChange={handleChange}
-          className="register-input"
+          className="auth-input"
           required
         />
 
@@ -54,7 +55,7 @@ function Register() {
           placeholder="Email Address"
           value={formData.email}
           onChange={handleChange}
-          className="register-input"
+          className="auth-input"
           required
         />
 
@@ -64,7 +65,7 @@ function Register() {
           placeholder="Password"
           value={formData.password}
           onChange={handleChange}
-          className="register-input"
+          className="auth-input"
           required
         />
 
@@ -74,14 +75,23 @@ function Register() {
           placeholder="Confirm Password"
           value={formData.confirmPassword}
           onChange={handleChange}
-          className="register-input"
+          className="auth-input"
           required
         />
 
-        <button type="submit" className="register-btn">
+        <button type="submit" className="auth-btn">
           Register
         </button>
+
+        <p className="auth-link">
+          Already have an account?{" "}
+          <button onClick={() => navigate("/login")}>Login</button>
+        </p>
       </form>
+        <p className="terms">
+        By signing up, you agree to our <a href="/terms">Terms</a> &{" "}
+        <a href="/privacy">Privacy Policy</a>.
+      </p>
     </div>
   );
 }

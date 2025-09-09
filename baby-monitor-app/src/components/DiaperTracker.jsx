@@ -1,46 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function DiaperTracker() {
   const [entries, setEntries] = useState([]);
-  const [diaperType, setDiaperType] = useState("");
   const [messType, setMessType] = useState("");
   const [lastChange, setLastChange] = useState(null);
 
+  const [hours, setHours] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+
   const handleAddEntry = () => {
-    if (!diaperType || !messType) return;
+    if (!messType) return;
 
     const now = new Date().toLocaleString();
-    const newEntry = { diaperType, messType, time: now };
+    const newEntry = { messType, time: now };
 
     setEntries([newEntry, ...entries]);
     setLastChange(now);
 
-    setDiaperType("");
     setMessType("");
+  };
+
+  useEffect(() => {
+    let countdown;
+    if (isRunning && timeLeft > 0) {
+      countdown = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      alert("⏰ Time to change the baby’s diaper!");
+      setIsRunning(false);
+    }
+    return () => clearInterval(countdown);
+  }, [isRunning, timeLeft]);
+
+  const handleStartTimer = () => {
+    const h = parseInt(hours) || 0;
+    const m = parseInt(minutes) || 0;
+    if (h === 0 && m === 0) return;
+
+    const totalSeconds = h * 3600 + m * 60;
+    setTimeLeft(totalSeconds);
+    setIsRunning(true);
+  };
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s < 10 ? "0" : ""}${s}s`;
   };
 
   return (
     <div className="container">
-      <h2 className="title"> Diaper Tracker</h2>
+      <h2 className="title">🍼 Diaper Tracker</h2>
 
       {lastChange ? (
         <p className="last-change">
-           Last change: <strong>{lastChange}</strong>
+          Last change: <strong>{lastChange}</strong>
         </p>
       ) : (
         <p className="last-change">No diaper changes logged yet</p>
       )}
-
-      <select
-        value={diaperType}
-        onChange={(e) => setDiaperType(e.target.value)}
-        className="select"
-      >
-        <option value="">Select Diaper Type</option>
-        <option value="Wet">Wet 💧</option>
-        <option value="Dirty">Dirty 💩</option>
-        <option value="Both">Both 💧💩</option>
-      </select>
 
       <select
         value={messType}
@@ -57,7 +79,7 @@ function DiaperTracker() {
         Add Entry
       </button>
 
-     <h3 className="history-title"> Change History</h3>
+      <h3 className="history-title">📋 Change History</h3>
       {entries.length === 0 ? (
         <p className="empty">No history yet</p>
       ) : (
@@ -65,13 +87,39 @@ function DiaperTracker() {
           {entries.map((entry, index) => (
             <li key={index} className="log-item">
               <div>
-                <span className="log-type">{entry.diaperType}</span> –{" "}
                 <span className="log-mess">{entry.messType}</span>
               </div>
               <div className="time">{entry.time}</div>
             </li>
           ))}
         </ul>
+      )}
+
+      <h3 className="history-title">⏰ Set Diaper Change Timer</h3>
+      <div className="timer">
+        <input
+          type="number"
+          min="0"
+          placeholder="Hours"
+          value={hours}
+          onChange={(e) => setHours(e.target.value)}
+          className="select"
+        />
+        <input
+          type="number"
+          min="0"
+          placeholder="Minutes"
+          value={minutes}
+          onChange={(e) => setMinutes(e.target.value)}
+          className="select"
+        />
+        <button onClick={handleStartTimer} className="btn">
+          Start Timer
+        </button>
+      </div>
+
+      {isRunning && timeLeft !== null && (
+        <p className="countdown">Time left: {formatTime(timeLeft)}</p>
       )}
     </div>
   );

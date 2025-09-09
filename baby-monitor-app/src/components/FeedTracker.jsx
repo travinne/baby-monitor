@@ -1,69 +1,129 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function FeedTracker() {
+function FeedingTracker() {
+  const [entries, setEntries] = useState([]);
   const [feedType, setFeedType] = useState("");
-  const [amount, setAmount] = useState("");
-  const [time, setTime] = useState("");
-  const [history, setHistory] = useState([]);
+  const [lastFeed, setLastFeed] = useState(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [hours, setHours] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
 
-    const newFeed = {
-      id: Date.now(),
-      feedType,
-      amount,
-      time: time || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
+  const handleAddEntry = () => {
+    if (!feedType) return;
 
-    setHistory([newFeed, ...history]); 
-    setAmount("");
-    setTime("");
+    const now = new Date().toLocaleString();
+    const newEntry = { feedType, time: now };
+
+    setEntries([newEntry, ...entries]);
+    setLastFeed(now);
+
+    setFeedType("");
+  };
+
+  useEffect(() => {
+    let countdown;
+    if (isRunning && timeLeft > 0) {
+      countdown = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      alert("⏰ Time to feed the baby!");
+      setIsRunning(false);
+    }
+    return () => clearInterval(countdown);
+  }, [isRunning, timeLeft]);
+
+  const handleStartTimer = () => {
+    const h = parseInt(hours) || 0;
+    const m = parseInt(minutes) || 0;
+    if (h === 0 && m === 0) return;
+
+    const totalSeconds = h * 3600 + m * 60;
+    setTimeLeft(totalSeconds);
+    setIsRunning(true);
+  };
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s < 10 ? "0" : ""}${s}s`;
   };
 
   return (
-    <div className="feed-container">
-      <h2 className="feed-title">Feed Tracker</h2>
+    <div className="container">
+      <h2 className="title">🍼 Feeding Tracker</h2>
 
-      <form className="feed-form" onSubmit={handleSubmit}>
-        <label>Feed Type:</label>
-        <select value={feedType} onChange={(e) => setFeedType(e.target.value)} className="feed-select">
-          <option value="breast">Breast</option>
-          <option value="bottle">Bottle</option>
-          <option value="solid">Solid</option>
-        </select>
+      {lastFeed ? (
+        <p className="last-feed">
+          Last feed: <strong>{lastFeed}</strong>
+        </p>
+      ) : (
+        <p className="last-feed">No feedings logged yet</p>
+      )}
 
-        <label>Amount (ml / oz):</label>
+      <select
+        value={feedType}
+        onChange={(e) => setFeedType(e.target.value)}
+        className="select"
+      >
+        <option value="">Select Feed Type</option>
+        <option value="Breast Milk">Breast Milk 🍼</option>
+        <option value="Formula">Formula 🍼</option>
+        <option value="Solid Food">Solid Food 🍎</option>
+        <option value="Snack">Snack 🍪</option>
+      </select>
+
+      <button onClick={handleAddEntry} className="btn">
+        Add Feeding
+      </button>
+
+      <h3 className="history-title">📋 Feeding History</h3>
+      {entries.length === 0 ? (
+        <p className="empty">No history yet</p>
+      ) : (
+        <ul className="log-list">
+          {entries.map((entry, index) => (
+            <li key={index} className="log-item">
+              <div>
+                <span className="log-feed">{entry.feedType}</span>
+              </div>
+              <div className="time">{entry.time}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h3 className="history-title">⏰ Set Feeding Timer</h3>
+      <div className="timer">
         <input
           type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="feed-input"
+          min="0"
+          placeholder="Hours"
+          value={hours}
+          onChange={(e) => setHours(e.target.value)}
+          className="select"
         />
-
-        <label>Time:</label>
         <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="feed-input"
+          type="number"
+          min="0"
+          placeholder="Minutes"
+          value={minutes}
+          onChange={(e) => setMinutes(e.target.value)}
+          className="select"
         />
+        <button onClick={handleStartTimer} className="btn">
+          Start Timer
+        </button>
+      </div>
 
-        <button type="submit" className="feed-button">Log Feed</button>
-      </form>
-
-      <h3 className="feed-history-title">Feed History</h3>
-      <ul className="feed-history">
-        {history.length === 0 ? (
-          <p className="feed-empty">No feeds logged yet</p>
-        ) : (
-          history.map((feed) => (
-            <li key={feed.id} className="feed-item">
-              <strong>{feed.feedType}</strong> — {feed.amount} — {feed.time}
-            </li>
-          ))
-        )}
-      </ul>
+      {isRunning && timeLeft !== null && (
+        <p className="countdown">Time left: {formatTime(timeLeft)}</p>
+      )}
     </div>
   );
 }
+
+export default FeedingTracker;
