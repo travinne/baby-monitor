@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BackButton from "../components/BackButton";
 
 function BabyProfile() {
   const storedBaby = JSON.parse(localStorage.getItem("baby"));
@@ -38,6 +39,7 @@ function BabyProfile() {
 
   return (
     <div className="baby-profile-container">
+      <BackButton />
       <h2>Baby Profile</h2>
 
       <div className="baby-photo">

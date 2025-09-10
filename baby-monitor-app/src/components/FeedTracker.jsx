@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import BackButton from "./BackButton";
+
 
 function FeedingTracker() {
   const [entries, setEntries] = useState([]);
@@ -54,7 +56,8 @@ function FeedingTracker() {
 
   return (
     <div className="container">
-      <h2 className="title">🍼 Feeding Tracker</h2>
+       <BackButton />
+      <h2 className="title"> Feeding Tracker</h2>
 
       {lastFeed ? (
         <p className="last-feed">

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import BackButton from "./BackButton";
+
 
 function BathTimeTracker(){
     const [entries, setEntries] = useState([]);
@@ -24,7 +26,7 @@ function BathTimeTracker(){
         setTimeLeft((prev) => prev - 60);
       }, 60000);
     } else if (timeLeft === 0) {
-      alert("🛁 Time for your baby’s bath!");
+      alert("Time for your baby's bath!");
       setIsRunning(false);
     }
     return () => clearInterval(countdown);
@@ -49,6 +51,7 @@ function BathTimeTracker(){
 
   return (
     <div className="container">
+      <BackButton />
       <h2 className="title"> Bath Time Tracker</h2>
 
       {lastBath ? (

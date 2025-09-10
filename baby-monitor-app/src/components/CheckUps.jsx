@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import BackButton from "./BackButton";
+
 
 function Checkups() {
   const [checkups, setCheckups] = useState([]);
@@ -82,7 +84,8 @@ function Checkups() {
 
   return (
     <div className="container">
-      <h2 className="title">🩺 Checkups Tracker</h2>
+       <BackButton />
+      <h2 className="title"> Checkups Tracker</h2>
 
       <div className="form">
         <input

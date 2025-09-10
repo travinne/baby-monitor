@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import BackButton from "./BackButton";
+
 
 function GrowthTracker() {
   const [entries, setEntries] = useState([]);
@@ -60,7 +62,8 @@ function GrowthTracker() {
 
   return (
     <div className="container">
-      <h2 className="title">📏 Growth Tracker</h2>
+       <BackButton />
+      <h2 className="title"> Growth Tracker</h2>
 
       {lastEntry ? (
         <p className="last-change">

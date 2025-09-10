@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import BackButton from "./BackButton";
+
 
 function Allergies() {
   const [allergy, setAllergy] = useState("");
@@ -39,6 +41,7 @@ function Allergies() {
 
   return (
     <div className="allergies">
+       <BackButton />
       <h2>Allergies Tracker</h2>
 
       <form onSubmit={handleSubmit}>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import BackButton from "./BackButton";
+
 
 function DiaperTracker() {
   const [entries, setEntries] = useState([]);
@@ -54,7 +56,8 @@ function DiaperTracker() {
 
   return (
     <div className="container">
-      <h2 className="title">🍼 Diaper Tracker</h2>
+       <BackButton />
+      <h2 className="title">Diaper Tracker</h2>
 
       {lastChange ? (
         <p className="last-change">

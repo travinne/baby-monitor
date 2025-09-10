@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import BackButton from "./BackButton";
+
 
 function SleepTracker() {
   const [sleepStart, setSleepStart] = useState(null);
@@ -32,6 +34,7 @@ function SleepTracker() {
 
   return (
     <div className="sleep-tracker">
+       <BackButton />
       <h2>Sleep Tracker</h2>
       <div className="controls">
         {!sleepStart ? (
