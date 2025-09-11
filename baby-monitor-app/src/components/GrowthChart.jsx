@@ -94,7 +94,7 @@ function GrowthTracker() {
         Add Entry
       </button>
 
-      <h3 className="history-title">📋 Growth History</h3>
+      <h3 className="history-title"> Growth History</h3>
       {entries.length === 0 ? (
         <p className="empty">No growth records yet</p>
       ) : (
@@ -112,7 +112,7 @@ function GrowthTracker() {
         </ul>
       )}
 
-      <h3 className="history-title">⏰ Set Growth Check Reminder</h3>
+      <h3 className="history-title"> Set Growth Check Reminder</h3>
       <div className="timer">
         <input
           type="number"

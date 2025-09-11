@@ -35,7 +35,7 @@ function Home() {
       </main>
 
       <footer className="home-footer">
-        <small>© {formattedDate} Baby Monitor App</small>
+        Baby Monitor App
       </footer>
     </div>
   );

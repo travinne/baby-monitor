@@ -170,7 +170,7 @@ function Checkups() {
         <button onClick={handleStartLongTimer} className="btn">Start Long Timer</button>
       </div>
       {longRunning && longTimeLeft !== null && (
-        <p className="countdown">📅 Long-Term: {formatTime(longTimeLeft)}</p>
+        <p className="countdown">Long-Term: {formatTime(longTimeLeft)}</p>
       )}
     </div>
   );

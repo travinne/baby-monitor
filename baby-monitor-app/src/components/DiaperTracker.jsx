@@ -31,7 +31,7 @@ function DiaperTracker() {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
-      alert("⏰ Time to change the baby’s diaper!");
+      alert("⏰ Time to change the baby's diaper!");
       setIsRunning(false);
     }
     return () => clearInterval(countdown);
@@ -73,16 +73,16 @@ function DiaperTracker() {
         className="select"
       >
         <option value="">Select Mess Type</option>
-        <option value="Pee">Pee 💧</option>
-        <option value="Poop">Poop 💩</option>
-        <option value="Mixed">Mixed 💧💩</option>
+        <option value="Pee">Pee </option>
+        <option value="Poop">Poop </option>
+        <option value="Mixed">Mixed </option>
       </select>
 
       <button onClick={handleAddEntry} className="btn">
         Add Entry
       </button>
 
-      <h3 className="history-title">📋 Change History</h3>
+      <h3 className="history-title">Change History</h3>
       {entries.length === 0 ? (
         <p className="empty">No history yet</p>
       ) : (
@@ -98,7 +98,7 @@ function DiaperTracker() {
         </ul>
       )}
 
-      <h3 className="history-title">⏰ Set Diaper Change Timer</h3>
+      <h3 className="history-title">Set Diaper Change Timer</h3>
       <div className="timer">
         <input
           type="number"

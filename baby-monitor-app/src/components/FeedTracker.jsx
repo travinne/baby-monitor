@@ -73,17 +73,17 @@ function FeedingTracker() {
         className="select"
       >
         <option value="">Select Feed Type</option>
-        <option value="Breast Milk">Breast Milk 🍼</option>
-        <option value="Formula">Formula 🍼</option>
-        <option value="Solid Food">Solid Food 🍎</option>
-        <option value="Snack">Snack 🍪</option>
+        <option value="Breast Milk">Breast Milk </option>
+        <option value="Formula">Formula </option>
+        <option value="Solid Food">Solid Food </option>
+        <option value="Snack">Snack </option>
       </select>
 
       <button onClick={handleAddEntry} className="btn">
         Add Feeding
       </button>
 
-      <h3 className="history-title">📋 Feeding History</h3>
+      <h3 className="history-title"> Feeding History</h3>
       {entries.length === 0 ? (
         <p className="empty">No history yet</p>
       ) : (
@@ -99,7 +99,7 @@ function FeedingTracker() {
         </ul>
       )}
 
-      <h3 className="history-title">⏰ Set Feeding Timer</h3>
+      <h3 className="history-title"> Set Feeding Timer</h3>
       <div className="timer">
         <input
           type="number"
