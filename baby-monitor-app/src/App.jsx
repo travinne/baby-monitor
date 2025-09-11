@@ -18,7 +18,6 @@ import BathTimeTracker from "./components/BathTime";
 
 import Navbar from "./components/NavBar";
 
-
 function AppWrapper() {
   const location = useLocation();
   const hiddenNavbarRoutes = ["/login", "/register"];

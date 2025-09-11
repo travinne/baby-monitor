@@ -4,18 +4,17 @@ import { FaBaby, FaMoon, FaUtensils, FaToilet, FaChartLine, FaSyringe, FaHeartbe
 
 function TrackerMenu() {
   return (
-    <div className="tracker-menu" style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
-      gap: "1.5rem",
-      textAlign: "center",
-      marginTop: "2rem"
-    }}>
-      <Link to="/baby-profile">
-        <FaBaby size={40} />
-        <p>Profile</p>
-      </Link>
-
+    <div
+      className="tracker-menu"
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(4, 1fr)",
+        gap: "1.5rem",
+        textAlign: "center",
+        marginTop: "2rem",
+      }}
+    >
+      
       <Link to="/feed-tracker">
         <FaUtensils size={40} />
         <p>Feeding</p>

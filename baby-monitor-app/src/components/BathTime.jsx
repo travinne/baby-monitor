@@ -1,30 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BackButton from "./BackButton";
 
+function BathTimeTracker() {
+  const [entries, setEntries] = useState([]);
+  const [lastBath, setLastBath] = useState(null);
 
-function BathTimeTracker(){
-    const [entries, setEntries] = useState([]);
-    const [lastBath, setLastBath] = useState(null);
+  const [days, setDays] = useState("");
+  const [hours, setHours] = useState("");
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
 
-    const [days, setDays] = useState("");
-    const [hours, setHours] = useState("");
-    const [timeLeft, setTimeLeft] = useState("");
-    const [isRunning, setIsRunning] = useState(false);
+  const handleAddEntry = () => {
+    const now = new Date().toLocaleString();
+    const newEntry = { time: now };
+    setEntries([newEntry, ...entries]);
+    setLastBath(now);
+  };
 
-    const handleAddEntry = () => {
-        const now = new Date().toLocaleString()
-         const newEntry = { time: now };
-        setEntries ([newEntry, ...entries])
-        setLastBath(now);
-
-    }
-
-     useEffect(() => {
+  useEffect(() => {
     let countdown;
     if (isRunning && timeLeft > 0) {
       countdown = setInterval(() => {
-        setTimeLeft((prev) => prev - 60);
-      }, 60000);
+        setTimeLeft((prev) => prev - 1);
+      }, 1000); 
     } else if (timeLeft === 0) {
       alert("Time for your baby's bath!");
       setIsRunning(false);
@@ -46,13 +44,14 @@ function BathTimeTracker(){
     const d = Math.floor(seconds / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    return `${d > 0 ? d + "d " : ""}${h}h ${m}m`;
+    const s = seconds % 60;
+    return `${d > 0 ? d + "d " : ""}${h}h ${m}m ${s}s`;
   };
 
   return (
     <div className="container">
       <BackButton />
-      <h2 className="title"> Bath Time Tracker</h2>
+      <h2 className="title">Bath Time Tracker</h2>
 
       {lastBath ? (
         <p className="last-change">
@@ -66,7 +65,7 @@ function BathTimeTracker(){
         Log Bath
       </button>
 
-      <h3 className="history-title"> Bath History</h3>
+      <h3 className="history-title">Bath History</h3>
       {entries.length === 0 ? (
         <p className="empty">No history yet</p>
       ) : (
@@ -79,7 +78,7 @@ function BathTimeTracker(){
         </ul>
       )}
 
-      <h3 className="history-title"> Set Bath Reminder</h3>
+      <h3 className="history-title">Set Bath Reminder</h3>
       <div className="timer">
         <input
           type="number"
