@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 function Settings() {
   const [settings, setSettings] = useState({
     fullName: "John Doe",
     email: "john@example.com",
-    password: "",
+    newpassword: "",
+    oldPassword:"",
     notifications: true,
-    darkMode: false,
+    theme: 'light'
   });
+
+
+  useEffect(() => {
+    document.body.className = settings.theme === 'dark'?  "dark-theme" : "light-theme";
+  }, [settings.theme]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -15,6 +21,10 @@ function Settings() {
       ...settings,
       [name]: type === "checkbox" ? checked : value,
     });
+  };
+
+  const handleThemeChange = (mode) => {
+    setSettings((prev) => ({ ...prev, theme: mode }));
   };
 
   const handleSubmit = (e) => {
@@ -60,11 +70,19 @@ function Settings() {
             onChange={handleChange}
             className="settings-input"
           />
+          <input 
+          type="password"
+          name= "oldpassword"
+          placeholder="Old Password"
+          value={settings.oldPassword}
+          onChange={handleChange}
+          className="settings input"
+           />
           <input
             type="password"
-            name="password"
+            name="newPassword"
             placeholder="New Password"
-            value={settings.password}
+            value={settings.newpassword}
             onChange={handleChange}
             className="settings-input"
           />
@@ -82,15 +100,22 @@ function Settings() {
             Enable Notifications
           </label>
 
-          <label className="settings-label">
-            <input
-              type="checkbox"
-              name="darkMode"
-              checked={settings.darkMode}
-              onChange={handleChange}
-            />
-            Dark Mode
-          </label>
+         <div className="theme-toggle">
+         <button
+         type="button"
+         onClick={() => handleThemeChange('light')}
+         className={settings.theme === "light" ? "activate-theme" : ""}
+         >
+          light Mode
+         </button>
+         <button
+         type="button"
+         onClick={() => handleThemeChange('dark')}
+         className={settings.theme === "dark" ? "activate-theme" : ""}
+         >
+          dark Mode
+         </button>
+         </div>
         </div>
 
         <button type="submit" className="settings-btn">

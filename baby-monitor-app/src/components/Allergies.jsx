@@ -46,7 +46,7 @@ function Allergies() {
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Allergy / Trigger:</label>
+          <label>Allergy:</label>
           <input
             type="text"
             value={allergy}
