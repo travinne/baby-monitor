@@ -31,7 +31,7 @@ function FeedingTracker() {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
-      alert("⏰ Time to feed the baby!");
+      alert("Time to feed the baby!");
       setIsRunning(false);
     }
     return () => clearInterval(countdown);

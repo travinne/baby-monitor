@@ -8,18 +8,7 @@ function BackButton() {
   return (
     <button
       onClick={() => navigate(-1)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem",
-        background: "#f0f0f0",
-        border: "none",
-        padding: "0.5rem 1rem",
-        borderRadius: "8px",
-        cursor: "pointer",
-        marginBottom: "1rem",
-        fontSize: "1rem"
-      }}
+      className="back-button"
     >
       <FaArrowLeft /> Back
     </button>

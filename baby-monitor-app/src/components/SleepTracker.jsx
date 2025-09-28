@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import BackButton from "./BackButton";
 
-
 function SleepTracker() {
   const [sleepStart, setSleepStart] = useState(null);
   const [sleepEnd, setSleepEnd] = useState(null);
@@ -22,19 +21,18 @@ function SleepTracker() {
     const minutes = durationMinutes % 60;
     
     const newEntry = {
-         start: sleepStart.toLocaleString(),
-         end:sleepEnd.toLocaleString(),
-         duration: `${hours}h ${minutes}m`,
+      start: sleepStart.toLocaleString(),
+      end: end.toLocaleString(),
+      duration: `${hours}h ${minutes}m`,
     };
 
     setHistory([newEntry, ...history]);
     setSleepStart(null);
-    setSleepEnd(null);
   };
 
   return (
     <div className="sleep-tracker">
-       <BackButton />
+      <BackButton />
       <h2>Sleep Tracker</h2>
       <div className="controls">
         {!sleepStart ? (
@@ -52,14 +50,18 @@ function SleepTracker() {
         <p>Sleep started at: {sleepStart.toLocaleTimeString()}</p>
       )}
 
-      <h3>History</h3>
-      <ul className="history">
-        {history.map((entry, index) => (
-          <li key={index}>
-            <strong>{entry.duration}</strong> — {entry.start} → {entry.end}
-          </li>
-        ))}
-      </ul>
+      <h3>Sleep History</h3>
+      {history.length === 0 ? (
+        <p className="empty">No sleep records yet</p>
+      ) : (
+        <ul className="history">
+          {history.map((entry, index) => (
+            <li key={index}>
+              <strong>{entry.duration}</strong> — {entry.start} → {entry.end}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

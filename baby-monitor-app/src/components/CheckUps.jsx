@@ -34,7 +34,7 @@ function Checkups() {
         setShortTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (shortTimeLeft === 0) {
-      alert("⏰ Time for your short-term checkup reminder!");
+      alert(" Time for your short-term checkup reminder!");
       setShortRunning(false);
     }
     return () => clearInterval(countdown);
@@ -47,7 +47,7 @@ function Checkups() {
         setLongTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (longTimeLeft === 0) {
-      alert("📅 Time for your long-term checkup reminder!");
+      alert("Time for your long-term checkup reminder!");
       setLongRunning(false);
     }
     return () => clearInterval(countdown);

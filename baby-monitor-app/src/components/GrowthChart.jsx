@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import BackButton from "./BackButton";
 
-
 function GrowthTracker() {
   const [entries, setEntries] = useState([]);
   const [weight, setWeight] = useState("");
@@ -19,7 +18,7 @@ function GrowthTracker() {
     const now = new Date().toLocaleString();
     const newEntry = { weight, height, time: now };
 
-    setEntries([newEntry, ...entries]);
+    setEntries((prev) => [newEntry, ...prev]);
     setLastEntry(now);
 
     setWeight("");
@@ -27,15 +26,19 @@ function GrowthTracker() {
   };
 
   useEffect(() => {
-    let countdown;
-    if (isRunning && timeLeft > 0) {
-      countdown = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      alert("📏 Time to check the baby’s growth again!");
+    if (!isRunning || timeLeft === null) return;
+
+    if (timeLeft <= 0) {
+      alert("Time to check the baby’s growth again!");
       setIsRunning(false);
+      setTimeLeft(null);
+      return;
     }
+
+    const countdown = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
     return () => clearInterval(countdown);
   }, [isRunning, timeLeft]);
 
@@ -49,21 +52,28 @@ function GrowthTracker() {
     setIsRunning(true);
   };
 
+  const handleResetTimer = () => {
+    setIsRunning(false);
+    setTimeLeft(null);
+    setMonths("");
+    setDays("");
+  };
+
   const formatTime = (seconds) => {
     const totalDays = Math.floor(seconds / (24 * 3600));
-    const months = Math.floor(totalDays / 30);
-    const days = totalDays % 30;
+    const m = Math.floor(totalDays / 30);
+    const d = totalDays % 30;
     const h = Math.floor((seconds % (24 * 3600)) / 3600);
     const min = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
 
-    return `${months}m ${days}d ${h}h ${min}m ${s < 10 ? "0" : ""}${s}s`;
+    return `${m}m ${d}d ${h}h ${min}m ${s < 10 ? "0" : ""}${s}s`;
   };
 
   return (
     <div className="container">
-       <BackButton />
-      <h2 className="title"> Growth Tracker</h2>
+      <BackButton />
+      <h2 className="title">Growth Tracker</h2>
 
       {lastEntry ? (
         <p className="last-change">
@@ -94,7 +104,7 @@ function GrowthTracker() {
         Add Entry
       </button>
 
-      <h3 className="history-title"> Growth History</h3>
+      <h3 className="history-title">Growth History</h3>
       {entries.length === 0 ? (
         <p className="empty">No growth records yet</p>
       ) : (
@@ -112,7 +122,7 @@ function GrowthTracker() {
         </ul>
       )}
 
-      <h3 className="history-title"> Set Growth Check Reminder</h3>
+      <h3 className="history-title">Set Growth Check Reminder</h3>
       <div className="timer">
         <input
           type="number"
@@ -133,6 +143,11 @@ function GrowthTracker() {
         <button onClick={handleStartTimer} className="btn">
           Start Reminder
         </button>
+        {isRunning && (
+          <button onClick={handleResetTimer} className="btn cancel">
+            Reset
+          </button>
+        )}
       </div>
 
       {isRunning && timeLeft !== null && (

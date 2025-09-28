@@ -3,7 +3,7 @@ import TrackerMenu from "../components/TrackerMenu";
 
 function Dashboard() {
   return (
-    <div>
+    <div className="dashboard-container">
       <h1>Baby Dashboard</h1>
       <TrackerMenu />
     </div>

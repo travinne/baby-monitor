@@ -13,11 +13,12 @@ function Home() {
   return (
     <div className="home-container">
       <header className="home-header">
-        <h1> Welcome to Baby Monitor App</h1>
+        <h1>Welcome to Baby Monitor App</h1>
         <p className="home-subtitle">
-          Your all-in-one tool to track your baby’s growth, feeding, sleeping, 
+          Your all-in-one tool to track your baby's growth, feeding, sleeping, 
           checkups, and more — all in one place.
         </p>
+        <div className="date-display">{formattedDate}</div>
       </header>
 
       <main className="home-main">
