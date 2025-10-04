@@ -9,7 +9,52 @@ function Register() {
     confirmPassword: "",
   });
 
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+
+  const validateField = (name, value) => {
+    const newErrors = { ...errors };
+
+    switch (name) {
+      case "username":
+        if (value.length < 3) {
+          newErrors.username = "Username must be at least 3 characters";
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          newErrors.username = "Username can only contain letters, numbers, and underscores";
+        } else {
+          delete newErrors.username;
+        }
+        break;
+      case "email":
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = "Please enter a valid email address";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case "password":
+        if (value.length < 8) {
+          newErrors.password = "Password must be at least 8 characters";
+        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
+          newErrors.password = "Password must contain uppercase, lowercase, and number";
+        } else {
+          delete newErrors.password;
+        }
+        break;
+      case "confirmPassword":
+        if (value !== formData.password) {
+          newErrors.confirmPassword = "Passwords do not match";
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+      default:
+        break;
+    }
+
+    setErrors(newErrors);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,81 +62,139 @@ function Register() {
       ...formData,
       [name]: value,
     });
+    validateField(name, value);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    Object.keys(formData).forEach(key => {
+      validateField(key, formData[key]);
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setIsSubmitting(false);
+      alert("Please fix all errors before submitting");
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
+      setErrors({ ...errors, confirmPassword: "Passwords do not match" });
+      setIsSubmitting(false);
       alert("Passwords do not match!");
       return;
     }
 
-    localStorage.setItem("user", JSON.stringify(formData));
+    const { confirmPassword, ...userDataToSave } = formData;
+    localStorage.setItem("user", JSON.stringify(userDataToSave));
 
-    alert("Registration successful!");
-    navigate("/dashboard");
+    setTimeout(() => {
+      setIsSubmitting(false);
+      alert("Registration successful! Welcome aboard!");
+      navigate("/dashboard");
+    }, 1000);
   };
 
   return (
     <div className="auth">
       <form onSubmit={handleSubmit} className="auth-form">
-        <h2 className="auth-title">Parent Registration</h2>
-        <p className="auth-subtitle">Create your account to access the dashboard</p>
+        <h2 className="auth-title">Create Account</h2>
+        <p className="auth-subtitle">Join us to start tracking your baby's journey</p>
 
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          className="auth-input"
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
+          <input
+            id="username"
+            type="text"
+            name="username"
+            placeholder="Choose a username"
+            value={formData.username}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          {errors.username && (
+            <span className="error-message">{errors.username}</span>
+          )}
+        </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={formData.email}
-          onChange={handleChange}
-          className="auth-input"
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="email">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="your.email@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          {errors.email && (
+            <span className="error-message">{errors.email}</span>
+          )}
+        </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="auth-input"
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            placeholder="Create a strong password"
+            value={formData.password}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          {errors.password && (
+            <span className="error-message">{errors.password}</span>
+          )}
+        </div>
 
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          className="auth-input"
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+          {errors.confirmPassword && (
+            <span className="error-message">{errors.confirmPassword}</span>
+          )}
+        </div>
 
-        <button type="submit" className="auth-btn">
-          Register
+        <button 
+          type="submit" 
+          className="btn auth-btn"
+          disabled={isSubmitting || Object.keys(errors).length > 0}
+        >
+          {isSubmitting ? "Creating Account..." : "Register"}
         </button>
 
         <p className="auth-link">
           Already have an account?{" "}
-          <button onClick={() => navigate("/login")}>Login</button>
+          <button 
+            type="button"
+            onClick={() => navigate("/login")}
+            className="link-btn"
+          >
+            Login here
+          </button>
+        </p>
+
+        <p className="terms">
+          By signing up, you agree to our{" "}
+          <a href="/terms" className="link">Terms</a> &{" "}
+          <a href="/privacy" className="link">Privacy Policy</a>
         </p>
       </form>
-        <p className="terms">
-        By signing up, you agree to our <a href="/terms">Terms</a> &{" "}
-        <a href="/privacy">Privacy Policy</a>.
-      </p>
     </div>
   );
 }
