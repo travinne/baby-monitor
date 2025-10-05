@@ -1,23 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaMoon, FaUtensils, FaToilet, FaChartLine, FaSyringe, FaHeartbeat, FaBath } from "react-icons/fa";
 
 function TrackerMenu() {
   const trackers = [
-    { to: "/feed-tracker", icon: FaUtensils, label: "Feeding" },
-    { to: "/sleep-tracker", icon: FaMoon, label: "Sleep" },
-    { to: "/diaper-tracker", icon: FaToilet, label: "Diapers" },
-    { to: "/growth-tracker", icon: FaChartLine, label: "Growth" },
-    { to: "/checkups", icon: FaSyringe, label: "Checkups" },
-    { to: "/allergies", icon: FaHeartbeat, label: "Allergies" },
-    { to: "/bath-time", icon: FaBath, label: "Bath Time" },
+    { to: "/feed-tracker", icon: "🍼", label: "Feeding" },
+    { to: "/sleep-tracker", icon: "😴", label: "Sleep" },
+    { to: "/diaper-tracker", icon: "🚼", label: "Diapers" },
+    { to: "/growth-tracker", icon: "📊", label: "Growth" },
+    { to: "/checkups", icon: "💉", label: "Checkups" },
+    { to: "/allergies", icon: "⚠️", label: "Allergies" },
+    { to: "/bath-time", icon: "🛁", label: "Bath Time" },
   ];
 
   return (
     <div className="tracker-menu">
-      {trackers.map(({ to, icon: Icon, label }) => (
-        <Link key={to} to={to} className="tracker-card">
-          <Icon size={40} />
+      {trackers.map(({ to, icon, label }) => (
+        <Link key={to} to={to}>
+          <span style={{ fontSize: '2.5rem' }}>{icon}</span>
           <p>{label}</p>
         </Link>
       ))}

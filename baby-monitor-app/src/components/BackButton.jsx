@@ -1,16 +1,30 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function BackButton() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
+  const hiddenPaths = ["/", "/dashboard"];
+  if (hiddenPaths.includes(location.pathname)) {
+    return null;
+  }
 
   return (
     <button
-      onClick={() => navigate(-1)}
+      onClick={handleBack}
       className="back-button"
+      aria-label="Go back to previous page"
     >
-      <FaArrowLeft /> Back
+      ← Back
     </button>
   );
 }

@@ -40,7 +40,7 @@ function AppWrapper() {
           <Route path="/feed-tracker" element={<FeedTracker />} />
           <Route path="/sleep-tracker" element={<SleepTracker />} />
           <Route path="/diaper-tracker" element={<DiaperTracker />} />
-          <Route path="/growth-chart" element={<GrowthChart />} />
+          <Route path="/growth-tracker" element={<GrowthChart />} />
           <Route path="/checkups" element={<CheckUps />} />
           <Route path="/allergies" element={<Allergies />} />
           <Route path="/bath-time" element={<BathTimeTracker />} />
