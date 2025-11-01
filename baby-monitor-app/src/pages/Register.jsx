@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ function Register() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
   const validateField = (name, value) => {
@@ -18,36 +20,30 @@ function Register() {
 
     switch (name) {
       case "username":
-        if (value.length < 3) {
+        if (value.length < 3)
           newErrors.username = "Username must be at least 3 characters";
-        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-          newErrors.username = "Username can only contain letters, numbers, and underscores";
-        } else {
-          delete newErrors.username;
-        }
+        else if (!/^[a-zA-Z0-9_]+$/.test(value))
+          newErrors.username =
+            "Username can only contain letters, numbers, and underscores";
+        else delete newErrors.username;
         break;
       case "email":
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
           newErrors.email = "Please enter a valid email address";
-        } else {
-          delete newErrors.email;
-        }
+        else delete newErrors.email;
         break;
       case "password":
-        if (value.length < 8) {
+        if (value.length < 8)
           newErrors.password = "Password must be at least 8 characters";
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-          newErrors.password = "Password must contain uppercase, lowercase, and number";
-        } else {
-          delete newErrors.password;
-        }
+        else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value))
+          newErrors.password =
+            "Password must contain uppercase, lowercase, and a number";
+        else delete newErrors.password;
         break;
       case "confirmPassword":
-        if (value !== formData.password) {
+        if (value !== formData.password)
           newErrors.confirmPassword = "Passwords do not match";
-        } else {
-          delete newErrors.confirmPassword;
-        }
+        else delete newErrors.confirmPassword;
         break;
       default:
         break;
@@ -58,49 +54,59 @@ function Register() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
     validateField(name, value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMsg("");
 
-    Object.keys(formData).forEach(key => {
-      validateField(key, formData[key]);
-    });
+    Object.keys(formData).forEach((key) =>
+      validateField(key, formData[key])
+    );
 
     if (Object.keys(errors).length > 0) {
       setIsSubmitting(false);
-      alert("Please fix all errors before submitting");
+      alert("Please fix the errors before submitting");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setErrors({ ...errors, confirmPassword: "Passwords do not match" });
       setIsSubmitting(false);
-      alert("Passwords do not match!");
       return;
     }
 
-    const { confirmPassword, ...userDataToSave } = formData;
-    localStorage.setItem("user", JSON.stringify(userDataToSave));
+    try {
+      const res = await API.post("/register", {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+      const { token, user } = res.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       alert("Registration successful! Welcome aboard!");
       navigate("/dashboard");
-    }, 1000);
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || "Registration failed!");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="auth">
       <form onSubmit={handleSubmit} className="auth-form">
         <h2 className="auth-title">Create Account</h2>
-        <p className="auth-subtitle">Join us to start tracking your baby's journey</p>
+        <p className="auth-subtitle">
+          Join us to start tracking your baby's journey
+        </p>
 
         <div className="form-group">
           <label htmlFor="username">Username</label>
@@ -170,17 +176,19 @@ function Register() {
           )}
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="btn auth-btn"
-          disabled={isSubmitting || Object.keys(errors).length > 0}
+          disabled={isSubmitting}
         >
           {isSubmitting ? "Creating Account..." : "Register"}
         </button>
 
+        {errorMsg && <p className="error-message">{errorMsg}</p>}
+
         <p className="auth-link">
           Already have an account?{" "}
-          <button 
+          <button
             type="button"
             onClick={() => navigate("/login")}
             className="link-btn"

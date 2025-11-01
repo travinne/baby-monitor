@@ -1,3 +1,4 @@
+/* ------------------ YOUR ORIGINAL CSS (unchanged) ------------------ */
 * {
   margin: 0;
   padding: 0;
@@ -765,8 +766,12 @@ label {
   }
   
   .baby-img, .placeholder-pic {
-    width: 180px;
-    height: 180px;
+     width: 120px;         
+  height: 120px;
+  border-radius: 50%;   
+  object-fit: cover;    
+  border: 3px solid #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
   }
 }
 
@@ -783,3 +788,417 @@ html {
   outline: 3px solid var(--primary-color);
   outline-offset: 2px;
 }
+
+/* ------------------ NEW: ULTRA-11 ENHANCEMENTS (APPEND BELOW) ------------------ */
+/* Keep the base intact above — enhancements start here */
+
+/* 1) Extra variables for Ultra-Instinct (light) + Asta (dark) inspirations */
+:root {
+  --ui-glass: rgba(255,255,255,0.55);
+  --ui-glass-border: rgba(255,255,255,0.65);
+  --accent-neon: rgba(102,126,234,0.95);
+  --muted-plate: #f1f5f9;
+  --focus-ring: rgba(102,126,234,0.18);
+}
+
+/* Dark-mode (Asta black + red) accents */
+body.dark-theme {
+  --ui-glass: rgba(30,30,30,0.35);
+  --ui-glass-border: rgba(255,255,255,0.04);
+  --accent-neon: rgba(220,30,30,0.95); /* red neon */
+  --muted-plate: #141414;
+  --primary-color: #0f1724;
+  --primary-hover: #0b0f18;
+  --accent-color: #ff2e2e;
+  --accent-hover: #e21b1b;
+  --shadow-glow: 0 0 30px rgba(220,30,30,0.14);
+  filter: none;
+}
+
+/* 2) Global glassmorphism layer for key panels */
+.glass {
+  background: linear-gradient(135deg, var(--ui-glass), rgba(255,255,255,0.06));
+  backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid var(--ui-glass-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+}
+
+/* 3) Page scaffold improvements (ultra centering + max rhythm) */
+.page-container, .container {
+  padding: 32px;
+}
+
+/* 4) Profile card — full luxury */
+.profile-card {
+  background: linear-gradient(180deg, var(--muted-plate), rgba(255,255,255,0.02));
+  padding: 28px;
+  gap: 36px;
+  align-items: start;
+  border-radius: 20px;
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.04);
+  overflow: visible;
+}
+
+/* 5) Circular avatar ring with subtle animation */
+.profile-photo {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 12px;
+  border: 8px solid transparent;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02));
+  position: relative;
+  box-shadow: 0 10px 30px rgba(10,10,30,0.08), 0 0 30px rgba(102,126,234,0.06);
+  transition: transform 350ms cubic-bezier(.2,.9,.2,1), box-shadow 350ms;
+}
+
+/* glowing aura ring */
+.profile-photo::after {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  background: conic-gradient(from 90deg, rgba(102,126,234,0.12), rgba(237,100,166,0.07));
+  z-index: -1;
+  filter: blur(18px);
+  transition: opacity 300ms;
+  opacity: 0.9;
+}
+
+/* hover micro-interaction */
+.profile-photo:hover {
+  transform: translateY(-6px) rotate(-1deg) scale(1.02);
+  box-shadow: 0 18px 48px rgba(10,10,30,0.12), 0 0 46px rgba(102,126,234,0.18);
+}
+
+/* dark-mode variant for ring */
+body.dark-theme .profile-photo::after {
+  background: radial-gradient(circle at 30% 20%, rgba(220,30,30,0.12), rgba(0,0,0,0));
+  opacity: 0.95;
+}
+
+/* 6) Photo placeholder upgrade */
+.photo-placeholder {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+  border: 6px dashed rgba(0,0,0,0.06);
+  font-size: 46px;
+}
+
+/* 7) Photo action buttons — stacked modern controls */
+.photo-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.profile-photo-wrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-photo {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
+  margin-bottom: 12px;
+}
+
+.photo-placeholder {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.photo-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.baby-age {
+  background: rgba(0,123,255,0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #007bff;
+  width: fit-content;
+  margin-bottom: 10px;
+}
+
+.photo-buttons .btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: 0 6px 20px rgba(10,10,30,0.06);
+}
+
+/* primary (glass) button style */
+.btn.btn-primary {
+  background: linear-gradient(90deg, var(--accent-neon), var(--primary-hover));
+  color: white;
+  border: none;
+  box-shadow: 0 8px 30px rgba(102,126,234,0.12);
+}
+
+/* danger styled for remove */
+.btn.btn-danger {
+  background: linear-gradient(90deg, rgba(255,80,80,0.95), rgba(226,30,30,0.9));
+  border: none;
+  color: white;
+  box-shadow: 0 8px 30px rgba(226,30,30,0.12);
+}
+
+/* 8) Form container: two-column layout on desktop with elegant spacing */
+.form-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 16px 20px;
+  align-items: start;
+}
+
+/* form-group spans full width for textarea and larger inputs */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+/* full-width fields (make the date and selects still look great) */
+.form-group:nth-last-child(1) {
+  grid-column: 1 / -1;
+}
+
+/* textarea style */
+.textarea {
+  min-height: 120px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+/* floating label effect (subtle) */
+.form-group label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 0.6px;
+}
+
+/* inputs: elevated subtle inner shadow for depth */
+.input {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245,246,250,0.98));
+  border: 1px solid rgba(16,24,40,0.04);
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: box-shadow 220ms, transform 220ms, border-color 220ms;
+}
+
+/* focus: neon ring */
+.input:focus, .select:focus, textarea:focus {
+  border-color: var(--accent-neon);
+  box-shadow: 0 6px 22px rgba(102,126,234,0.08), 0 0 0 6px rgba(102,126,234,0.08);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+/* input error */
+.input-error {
+  border-color: rgba(237,100,166,0.9) !important;
+  box-shadow: 0 6px 18px rgba(237,100,166,0.08);
+}
+
+/* 9) Save button — hero CTA with gradient ring */
+.save-btn {
+  display: inline-block;
+  border-radius: 14px;
+  padding: 14px 22px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  background: linear-gradient(90deg, var(--accent-neon), var(--secondary-color));
+  color: white;
+  border: none;
+  box-shadow: 0 18px 50px rgba(102,126,234,0.12), 0 6px 20px rgba(0,0,0,0.06);
+  transition: transform 220ms ease, box-shadow 220ms ease;
+  width: 100%;
+}
+
+/* subtle hover */
+.save-btn:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 28px 70px rgba(102,126,234,0.16), 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* 10) Accessibility improvements: larger hit targets and visible focus */
+button, .btn, .input, .select, textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*:focus-visible {
+  box-shadow: 0 0 0 6px var(--focus-ring), 0 6px 18px rgba(16,24,40,0.06);
+  outline: none;
+}
+
+/* 11) Tiny helpers */
+.center { text-align: center; }
+.hidden-file { display:none; }
+
+/* 12) Allergy list — card polish */
+.log-list.allergies {
+  display: grid;
+  gap: 14px;
+}
+
+.log-item {
+  padding: 18px;
+  border-radius: 14px;
+  transition: transform 200ms cubic-bezier(.2,.9,.2,1), box-shadow 200ms;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.log-item .meta {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* 13) Tiny animations for list entry */
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(8px) scale(.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.log-item { animation: popIn 360ms ease both; }
+
+/* 14) Responsive: collapse form to single column on small screens */
+@media (max-width: 900px) {
+  .form-container {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-photo, .baby-img {
+    width: 180px;
+    height: 180px;
+  }
+
+  .profile-card {
+    padding: 20px;
+  }
+}
+
+/* 15) Mobile micro-optimizations */
+@media (max-width: 480px) {
+  .profile-photo, .baby-img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .page-container {
+    padding: 18px;
+  }
+
+  .save-btn {
+    padding: 12px;
+  }
+}
+
+/* 16) Dark-mode Asta finishing touches (contrasty black + red) */
+body.dark-theme .page-container,
+body.dark-theme .profile-card,
+body.dark-theme .form,
+body.dark-theme .log-item {
+  background: linear-gradient(180deg, rgba(10,10,10,0.45), rgba(18,18,18,0.2));
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+/* Dark-mode CTA */
+body.dark-theme .save-btn {
+  background: linear-gradient(90deg, #ff3b3b, #b11212);
+  box-shadow: 0 18px 50px rgba(177,18,18,0.12), 0 6px 30px rgba(0,0,0,0.6);
+}
+
+/* 17) Floating hint microcopy (for photo size / allowed types) */
+.photo-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* 18) Animated skeleton for loading profile */
+.skeleton {
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.6s linear infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 19) Tiny UX: disable state */
+.is-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  transform: none !important;
+}
+
+/* 20) Microcopy & helpers for small screens */
+.small-muted {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* 21) Ensure the baby picture stays perfectly round even when different classes used */
+.baby-img, .profile-photo, .placeholder-pic, .photo-placeholder {
+  border-radius: 50% !important;
+  overflow: hidden;
+}
+
+/* 22) Form field icons (if you add icons) — space reserved */
+.form-group .icon {
+  width: 36px;
+  height: 36px;
+  display:inline-grid;
+  place-items:center;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  margin-right: 10px;
+}
+
+/* 23) Final polish: transition duration tuning for a more "premium" feel */
+* {
+  transition-duration: 220ms;
+}
+
+/* End of ULTRA-11 enhancements */

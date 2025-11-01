@@ -2,62 +2,88 @@ import React, { useState, useEffect } from "react";
 import BackButton from "./BackButton";
 
 function BathTimeTracker() {
-  const [entries, setEntries] = useState(() => {
-    const saved = localStorage.getItem("bathEntries");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const token = localStorage.getItem("token");
+  const [entries, setEntries] = useState([]);
   const [notes, setNotes] = useState("");
   const [lastBath, setLastBath] = useState(null);
-
   const [days, setDays] = useState("");
   const [hours, setHours] = useState("");
   const [timeLeft, setTimeLeft] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
-  useEffect(() => {
-    if (entries.length > 0) {
-      setLastBath(entries[0].time);
-      localStorage.setItem("bathEntries", JSON.stringify(entries));
+  const API_URL = "http://127.0.0.1:5000/api/baths/";
+
+  const fetchEntries = async () => {
+    try {
+      const res = await fetch(API_URL, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch bath records");
+      const data = await res.json();
+      const sorted = data.sort((a, b) => new Date(b.time) - new Date(a.time));
+      setEntries(sorted);
+      if (sorted.length > 0) setLastBath(sorted[0].time);
+    } catch (err) {
+      console.error(err);
     }
-  }, [entries]);
+  };
+
+  const handleAddEntry = async () => {
+    const now = new Date().toLocaleString();
+    const newEntry = { time: now, notes: notes.trim() || "No notes" };
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newEntry),
+      });
+      if (!res.ok) throw new Error("Failed to log bath");
+      const added = await res.json();
+      setEntries([added, ...entries]);
+      setLastBath(added.time);
+      setNotes("");
+    } catch (err) {
+      console.error(err);
+      alert("Error logging bath entry. Please try again.");
+    }
+  };
+
+  const handleDeleteEntry = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this record?")) return;
+    try {
+      const res = await fetch(`${API_URL}${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete record");
+      const updated = entries.filter((entry) => entry.id !== id);
+      setEntries(updated);
+      if (updated.length === 0) setLastBath(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting bath record.");
+    }
+  };
 
   const playAlarm = () => {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     for (let i = 0; i < 3; i++) {
       setTimeout(() => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = 550 + (i * 100);
-        oscillator.type = 'triangle';
-        gainNode.gain.setValueAtTime(0.25, audioContext.currentTime);
-        oscillator.start();
-        setTimeout(() => oscillator.stop(), 300);
-      }, i * 350);
-    }
-  };
-
-  const handleAddEntry = () => {
-    const now = new Date().toLocaleString();
-    const newEntry = { 
-      time: now,
-      notes: notes || "No notes"
-    };
-    
-    setEntries([newEntry, ...entries]);
-    setLastBath(now);
-    setNotes("");
-  };
-
-  const handleDeleteEntry = (index) => {
-    if (window.confirm("Delete this bath record?")) {
-      const updated = entries.filter((_, i) => i !== index);
-      setEntries(updated);
-      if (updated.length === 0) {
-        localStorage.removeItem("bathEntries");
-        setLastBath(null);
-      }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 500 + i * 100;
+        osc.type = "sine";
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        osc.start();
+        setTimeout(() => osc.stop(), 300);
+      }, i * 400);
     }
   };
 
@@ -79,24 +105,15 @@ function BathTimeTracker() {
   const handleStartTimer = () => {
     const d = parseInt(days) || 0;
     const h = parseInt(hours) || 0;
-    
-    if (d === 0 && h === 0) {
-      alert("Please enter days or hours");
-      return;
-    }
-
-    if (d < 0 || h < 0) {
-      alert("Please enter valid time values");
-      return;
-    }
-
+    if (d === 0 && h === 0) return alert("Please enter at least one value (days or hours)");
+    if (d < 0 || h < 0) return alert("Invalid time values");
     const totalSeconds = d * 86400 + h * 3600;
     setTimeLeft(totalSeconds);
     setIsRunning(true);
   };
 
   const handleResetTimer = () => {
-    if (window.confirm("Reset the bath reminder?")) {
+    if (window.confirm("Reset bath reminder?")) {
       setIsRunning(false);
       setTimeLeft(null);
       setDays("");
@@ -109,7 +126,7 @@ function BathTimeTracker() {
     const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    return `${d > 0 ? d + "d " : ""}${h}h ${m}m ${s}s`;
+    return `${d > 0 ? `${d}d ` : ""}${h}h ${m}m ${s}s`;
   };
 
   const calculateTimeSinceLastBath = () => {
@@ -120,32 +137,29 @@ function BathTimeTracker() {
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
     const remainingHours = diffHours % 24;
-    
-    if (diffDays > 0) {
-      return `${diffDays}d ${remainingHours}h ago`;
-    } else {
-      return `${diffHours}h ago`;
-    }
+    return diffDays > 0 ? `${diffDays}d ${remainingHours}h ago` : `${diffHours}h ago`;
   };
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
 
   return (
     <div className="container">
       <BackButton />
       <h2 className="title">Bath Time Tracker</h2>
-
       {lastBath ? (
-        <div>
+        <>
           <p className="last-change">
             Last bath: <strong>{lastBath}</strong>
           </p>
-          <p style={{ textAlign: 'center', color: '#666', marginTop: '8px' }}>
+          <p style={{ textAlign: "center", color: "#666", marginTop: "8px" }}>
             ({calculateTimeSinceLastBath()})
           </p>
-        </div>
+        </>
       ) : (
         <p className="last-change">No baths logged yet</p>
       )}
-
       <div className="form">
         <label>Notes (optional)</label>
         <textarea
@@ -155,31 +169,31 @@ function BathTimeTracker() {
           className="input"
           rows="2"
         />
-
         <button onClick={handleAddEntry} className="btn">
           Log Bath
         </button>
       </div>
-
       <h3 className="history-title">Bath History</h3>
       {entries.length === 0 ? (
         <p className="empty">No history yet</p>
       ) : (
         <ul className="log-list">
-          {entries.map((entry, index) => (
-            <li key={index} className="log-item">
+          {entries.map((entry) => (
+            <li key={entry.id} className="log-item">
               <div>
-                <span className="log-feed">Bath Time</span>
+                <span className="log-feed">Bath</span>
                 {entry.notes !== "No notes" && (
-                  <p style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>{entry.notes}</p>
+                  <p style={{ fontSize: "0.9em", color: "#666", marginTop: "4px" }}>
+                    {entry.notes}
+                  </p>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                 <span className="time">{entry.time}</span>
-                <button 
-                  onClick={() => handleDeleteEntry(index)}
+                <button
+                  onClick={() => handleDeleteEntry(entry.id)}
                   className="btn delete-btn"
-                  style={{ padding: '4px 8px', fontSize: '0.9em' }}
+                  style={{ padding: "4px 8px", fontSize: "0.9em" }}
                 >
                   Delete
                 </button>
@@ -188,7 +202,6 @@ function BathTimeTracker() {
           ))}
         </ul>
       )}
-
       <h3 className="history-title">Set Bath Reminder</h3>
       <div className="timer">
         <input
@@ -219,7 +232,6 @@ function BathTimeTracker() {
           </button>
         )}
       </div>
-
       {isRunning && timeLeft !== null && (
         <p className="countdown">Next bath in: {formatTime(timeLeft)}</p>
       )}

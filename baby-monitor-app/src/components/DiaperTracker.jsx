@@ -205,7 +205,7 @@ function DiaperTracker() {
                   className="btn-icon delete-btn"
                   title="Delete"
                 >
-                  ×
+                
                 </button>
               </div>
             </li>

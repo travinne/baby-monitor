@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import BackButton from "./BackButton";
 
 function FeedingTracker() {
-  const [entries, setEntries] = useState(() => {
-    const saved = localStorage.getItem("feedingEntries");
-    return saved ? JSON.parse(saved) : [];
+  const [feedings, setFeedings] = useState([]);
+  const [formData, setFormData] = useState({
+    food_type: "",
+    amount: "",
+    notes: "",
   });
-  const [feedType, setFeedType] = useState("");
-  const [amount, setAmount] = useState("");
-  const [notes, setNotes] = useState("");
   const [lastFeed, setLastFeed] = useState(null);
 
   const [hours, setHours] = useState("");
@@ -16,80 +15,85 @@ function FeedingTracker() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
+  const API_BASE = "http://127.0.0.1:5000/api/feeding/";
+
   useEffect(() => {
-    if (entries.length > 0) {
-      setLastFeed(entries[0].time);
-      localStorage.setItem("feedingEntries", JSON.stringify(entries));
+    loadFeedings();
+  }, []);
+
+  const loadFeedings = async () => {
+    try {
+      const res = await fetch(API_BASE);
+      if (!res.ok) throw new Error("Failed to fetch feeding data");
+
+      const data = await res.json();
+      const sorted = Array.isArray(data)
+        ? data.sort(
+            (a, b) =>
+              new Date(b.time || b.date || 0) - new Date(a.time || a.date || 0)
+          )
+        : [];
+
+      setFeedings(sorted);
+      if (sorted.length > 0) setLastFeed(sorted[0].time);
+    } catch (err) {
+      console.error("Error loading feeding data:", err);
     }
-  }, [entries]);
-
-  const playAlarm = () => {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-
-    oscillator.start();
-    setTimeout(() => {
-      oscillator.stop();
-      setTimeout(() => {
-        const osc2 = audioContext.createOscillator();
-        const gain2 = audioContext.createGain();
-        osc2.connect(gain2);
-        gain2.connect(audioContext.destination);
-        osc2.frequency.value = 1000;
-        osc2.type = 'sine';
-        gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-        osc2.start();
-        setTimeout(() => osc2.stop(), 300);
-      }, 100);
-    }, 300);
   };
 
-  const handleAddEntry = () => {
-    if (!feedType) {
-      alert("Please select a feed type");
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.food_type || !formData.amount) {
+      alert("Please fill in the required fields.");
       return;
     }
 
-    const now = new Date().toLocaleString();
-    const newEntry = { 
-      feedType, 
-      amount: amount || "Not specified",
-      notes: notes || "",
-      time: now 
+    const newFeed = {
+      food_type: formData.food_type.trim(),
+      amount: formData.amount.trim(),
+      notes: formData.notes.trim(),
+      time: new Date().toISOString(),
     };
 
-    setEntries([newEntry, ...entries]);
-    setLastFeed(now);
-    setFeedType("");
-    setAmount("");
-    setNotes("");
+    try {
+      const res = await fetch(API_BASE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newFeed),
+      });
+      if (!res.ok) throw new Error("Failed to add feeding record");
+
+      await loadFeedings();
+      setFormData({ food_type: "", amount: "", notes: "" });
+    } catch (err) {
+      console.error("Error adding feeding:", err);
+      alert("Error adding feeding record.");
+    }
   };
 
-  const handleDeleteEntry = (index) => {
-    if (window.confirm("Delete this feeding entry?")) {
-      const updated = entries.filter((_, i) => i !== index);
-      setEntries(updated);
-      if (updated.length === 0) {
-        localStorage.removeItem("feedingEntries");
-        setLastFeed(null);
-      }
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this record?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete record");
+      setFeedings((prev) => prev.filter((f) => f.id !== id));
+    } catch (err) {
+      console.error("Error deleting feeding:", err);
     }
   };
 
   useEffect(() => {
     let countdown;
     if (isRunning && timeLeft > 0) {
-      countdown = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
+      countdown = setInterval(() => setTimeLeft((t) => t - 1), 1000);
     } else if (timeLeft === 0) {
       playAlarm();
       alert("Time to feed the baby!");
@@ -102,29 +106,19 @@ function FeedingTracker() {
   const handleStartTimer = () => {
     const h = parseInt(hours) || 0;
     const m = parseInt(minutes) || 0;
-    
     if (h === 0 && m === 0) {
       alert("Please enter hours or minutes");
       return;
     }
-
-    if (h < 0 || m < 0 || m > 59) {
-      alert("Please enter valid time values");
-      return;
-    }
-
-    const totalSeconds = h * 3600 + m * 60;
-    setTimeLeft(totalSeconds);
+    setTimeLeft(h * 3600 + m * 60);
     setIsRunning(true);
   };
 
   const handleResetTimer = () => {
-    if (window.confirm("Reset the timer?")) {
-      setIsRunning(false);
-      setTimeLeft(null);
-      setHours("");
-      setMinutes("");
-    }
+    setIsRunning(false);
+    setTimeLeft(null);
+    setHours("");
+    setMinutes("");
   };
 
   const formatTime = (seconds) => {
@@ -134,6 +128,19 @@ function FeedingTracker() {
     return `${h}h ${m}m ${s < 10 ? "0" : ""}${s}s`;
   };
 
+  const playAlarm = () => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.frequency.value = 1000;
+    oscillator.type = "square";
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    oscillator.start();
+    setTimeout(() => oscillator.stop(), 800);
+  };
+
   return (
     <div className="container">
       <BackButton />
@@ -141,81 +148,82 @@ function FeedingTracker() {
 
       {lastFeed ? (
         <p className="last-feed">
-          Last feed: <strong>{lastFeed}</strong>
+          Last Feed: <strong>{new Date(lastFeed).toLocaleString()}</strong>
         </p>
       ) : (
-        <p className="last-feed">No feedings logged yet</p>
+        <p className="last-feed">No feeding records yet.</p>
       )}
 
-      <div className="form">
-        <label>Feed Type</label>
-        <select
-          value={feedType}
-          onChange={(e) => setFeedType(e.target.value)}
-          className="select"
-        >
-          <option value="">Select Feed Type</option>
-          <option value="Breast Milk">Breast Milk</option>
-          <option value="Formula">Formula</option>
-          <option value="Solid Food">Solid Food</option>
-          <option value="Snack">Snack</option>
-        </select>
-
-        <label>Amount (optional)</label>
+      <form onSubmit={handleSubmit} className="form">
+        <label>Food Type</label>
         <input
           type="text"
-          placeholder="e.g., 120ml, 1 jar, half portion"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="input"
+          name="food_type"
+          value={formData.food_type}
+          onChange={handleChange}
+          placeholder="e.g., Milk, Porridge"
+          className="select"
+          required
+        />
+
+        <label>Amount</label>
+        <input
+          type="text"
+          name="amount"
+          value={formData.amount}
+          onChange={handleChange}
+          placeholder="e.g., 120ml or 1 cup"
+          className="select"
+          required
         />
 
         <label>Notes (optional)</label>
         <textarea
-          placeholder="Any observations or notes..."
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="input"
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
+          placeholder="e.g., Baby didn’t finish"
+          className="select"
           rows="2"
         />
 
-        <button onClick={handleAddEntry} className="btn">
+        <button type="submit" className="btn">
           Add Feeding
         </button>
-      </div>
+      </form>
 
       <h3 className="history-title">Feeding History</h3>
-      {entries.length === 0 ? (
-        <p className="empty">No history yet</p>
+      {feedings.length === 0 ? (
+        <p className="empty">No feeding records yet</p>
       ) : (
         <ul className="log-list">
-          {entries.map((entry, index) => (
-            <li key={index} className="log-item">
+          {feedings.map((feed) => (
+            <li key={feed.id} className="log-item">
               <div>
-                <span className="log-feed">{entry.feedType}</span>
-                {entry.amount !== "Not specified" && (
-                  <span> - {entry.amount}</span>
+                <strong>{feed.food_type}</strong> — {feed.amount}
+                {feed.notes && (
+                  <p style={{ fontSize: "0.85em", color: "#666" }}>
+                    {feed.notes}
+                  </p>
                 )}
-                {entry.notes && (
-                  <p style={{ fontSize: '0.9em', color: '#666', marginTop: '4px' }}>{entry.notes}</p>
-                )}
+                <p style={{ fontSize: "0.85em", color: "#999" }}>
+                  {feed.time
+                    ? new Date(feed.time).toLocaleString()
+                    : "Unknown time"}
+                </p>
               </div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <span className="time">{entry.time}</span>
-                <button 
-                  onClick={() => handleDeleteEntry(index)}
-                  className="btn delete-btn"
-                  style={{ padding: '4px 8px', fontSize: '0.9em' }}
-                >
-                  Delete
-                </button>
-              </div>
+              <button
+                onClick={() => handleDelete(feed.id)}
+                className="btn delete-btn"
+              >
+                Delete
+              </button>
             </li>
           ))}
         </ul>
       )}
 
-      <h3 className="history-title">Set Feeding Timer</h3>
+      <h3 className="history-title">Feeding Timer</h3>
       <div className="timer">
         <input
           type="number"

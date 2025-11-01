@@ -1,75 +1,56 @@
 import React, { useEffect, useState } from "react";
 
 function Settings() {
-  const [settings, setSettings] = useState(() => {
-    const savedTheme = localStorage.getItem("theme") || "light";
-    const savedSettings = localStorage.getItem("userSettings");
-    
-    if (savedSettings) {
-      return { ...JSON.parse(savedSettings), theme: savedTheme };
-    }
-    
-    return {
-      fullName: "John Doe",
-      email: "john@example.com",
-      newPassword: "",
-      oldPassword: "",
-      notifications: true,
-      theme: savedTheme
-    };
+  const [settings, setSettings] = useState({
+    fullName: "",
+    email: "",
+    oldPassword: "",
+    newPassword: "",
+    notifications: true,
+    theme: localStorage.getItem("theme") || "light"
   });
 
   const [errors, setErrors] = useState({});
   const [isModified, setIsModified] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
+  fetch(`http://127.0.0.1:5000/api/settings/${userId}`,{
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setSettings({
+          fullName: data.full_name || "",
+          email: data.email || "",
+          notifications: true,
+          theme: localStorage.getItem("theme") || "light",
+          oldPassword: "",
+          newPassword: ""
+        });
+        setUserId(data.id);
+      })
+      .catch(() => alert("Failed to load user profile"));
+  }, []);
 
   useEffect(() => {
     document.body.className = settings.theme === "dark" ? "dark-theme" : "light-theme";
     localStorage.setItem("theme", settings.theme);
   }, [settings.theme]);
 
-  const validateField = (name, value) => {
-    const newErrors = { ...errors };
-    
-    switch (name) {
-      case "email":
-        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          newErrors.email = "Please enter a valid email address";
-        } else {
-          delete newErrors.email;
-        }
-        break;
-      case "newPassword":
-        if (value && value.length < 6) {
-          newErrors.newPassword = "Password must be at least 6 characters";
-        } else {
-          delete newErrors.newPassword;
-        }
-        break;
-      case "fullName":
-        if (value && value.trim().length < 2) {
-          newErrors.fullName = "Name must be at least 2 characters";
-        } else {
-          delete newErrors.fullName;
-        }
-        break;
-      default:
-        break;
-    }
-    
-    setErrors(newErrors);
-  };
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-    
     setSettings(prev => ({
       ...prev,
-      [name]: newValue
+      [name]: type === "checkbox" ? checked : value
     }));
-    
     setIsModified(true);
-    validateField(name, newValue);
   };
 
   const handleThemeChange = (mode) => {
@@ -77,78 +58,75 @@ function Settings() {
     setIsModified(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (Object.keys(errors).length > 0) {
-      alert("Please fix errors before saving.");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in first");
       return;
     }
 
-    if (settings.newPassword && !settings.oldPassword) {
-      alert("Please enter your current password to set a new password.");
-      return;
-    }
+    const response = await fetch(`http://127.0.0.1:5000/api/settings/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(settings),
+    });
 
-    localStorage.setItem("userSettings", JSON.stringify(settings));
-    alert("Settings updated successfully!");
-    setIsModified(false);
-    
-    setSettings(prev => ({
-      ...prev,
-      newPassword: "",
-      oldPassword: ""
-    }));
-  };
-
-  const handleReset = () => {
-    if (window.confirm("Reset all changes?")) {
-      const savedSettings = localStorage.getItem("userSettings");
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
-      }
-      setErrors({});
+    const data = await response.json();
+    if (response.ok) {
+      alert("Settings updated successfully!");
       setIsModified(false);
+      setSettings(prev => ({ ...prev, oldPassword: "", newPassword: "" }));
+    } else {
+      alert(data.error || "Failed to update settings");
     }
   };
 
-  const handleDeleteAccount = () => {
-    const confirmation = window.prompt(
-      "Type 'DELETE' to confirm account deletion. This action cannot be undone:"
-    );
-    
-    if (confirmation === "DELETE") {
+  const handleDeleteAccount = async () => {
+    const confirmation = window.prompt("Type DELETE to confirm account deletion:");
+    if (confirmation !== "DELETE") return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in first");
+      return;
+    }
+
+    const response = await fetch(`http://127.0.0.1:5000/api/users/delete/${userId}`,{
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (response.ok) {
+      alert("Account deleted successfully");
       localStorage.clear();
-      alert("Account deleted successfully. Redirecting...");
       window.location.href = "/";
-    } else if (confirmation !== null) {
-      alert("Invalid confirmation. Account was not deleted.");
+    } else {
+      alert("Failed to delete account");
     }
   };
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
-      localStorage.removeItem("userSettings");
-      alert("You have been logged out!");
-      window.location.href = "/login";
-    }
+    localStorage.removeItem("token");
+    alert("Logged out successfully!");
+    window.location.href = "/login";
   };
 
   return (
     <div className="container">
       <div className="settings-header">
         <h2 className="title">Account Settings</h2>
-        {isModified && (
-          <span className="unsaved-badge">
-            Unsaved changes
-          </span>
-        )}
+        {isModified && <span className="unsaved-badge">Unsaved changes</span>}
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="settings-section">
           <h3>Profile Information</h3>
-          
+
           <div className="form-group">
             <label htmlFor="fullName">Full Name</label>
             <input
@@ -160,9 +138,6 @@ function Settings() {
               onChange={handleChange}
               placeholder="Enter your full name"
             />
-            {errors.fullName && (
-              <span className="error-message">{errors.fullName}</span>
-            )}
           </div>
 
           <div className="form-group">
@@ -176,9 +151,6 @@ function Settings() {
               onChange={handleChange}
               placeholder="your.email@example.com"
             />
-            {errors.email && (
-              <span className="error-message">{errors.email}</span>
-            )}
           </div>
 
           <div className="form-group">
@@ -188,9 +160,9 @@ function Settings() {
               type="password"
               name="oldPassword"
               className="input"
-              placeholder="Enter current password to change it"
               value={settings.oldPassword}
               onChange={handleChange}
+              placeholder="Enter your current password"
             />
           </div>
 
@@ -201,101 +173,61 @@ function Settings() {
               type="password"
               name="newPassword"
               className="input"
-              placeholder="Enter new password (min. 6 characters)"
               value={settings.newPassword}
               onChange={handleChange}
+              placeholder="Enter new password"
             />
-            {errors.newPassword && (
-              <span className="error-message">{errors.newPassword}</span>
-            )}
           </div>
         </div>
 
         <div className="settings-section">
           <h3>Preferences</h3>
-          
-          <div className="form-group checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="notifications"
-                className="checkbox-input"
-                checked={settings.notifications}
-                onChange={handleChange}
-              />
-              <span className="checkbox-text">
-                Enable Notifications
-                <small>Receive updates about your baby's activities</small>
-              </span>
-            </label>
-          </div>
+          <label>
+            <input
+              type="checkbox"
+              name="notifications"
+              checked={settings.notifications}
+              onChange={handleChange}
+            />
+            Enable Notifications
+          </label>
 
-          <div className="form-group">
-            <label>Theme Preference</label>
-            <div className="theme-toggle">
-              <button
-                type="button"
-                className={`btn-theme ${settings.theme === "light" ? "activate-theme" : ""}`}
-                onClick={() => handleThemeChange("light")}
-              >
-                Light Mode
-              </button>
-              <button
-                type="button"
-                className={`btn-theme ${settings.theme === "dark" ? "activate-theme" : ""}`}
-                onClick={() => handleThemeChange("dark")}
-              >
-                Dark Mode
-              </button>
-            </div>
+          <div className="theme-toggle">
+            <button
+              type="button"
+              className={`btn-theme ${settings.theme === "light" ? "activate-theme" : ""}`}
+              onClick={() => handleThemeChange("light")}
+            >
+              Light Mode
+            </button>
+            <button
+              type="button"
+              className={`btn-theme ${settings.theme === "dark" ? "activate-theme" : ""}`}
+              onClick={() => handleThemeChange("dark")}
+            >
+              Dark Mode
+            </button>
           </div>
         </div>
 
-        <div className="form-actions">
-          <button 
-            type="submit" 
-            className="btn save-btn"
-            disabled={!isModified || Object.keys(errors).length > 0}
-          >
-            Save Changes
-          </button>
-          
-          <button 
-            type="button" 
-            className="btn btn-secondary"
-            onClick={handleReset}
-            disabled={!isModified}
-          >
-            Reset Changes
-          </button>
-        </div>
+        <button type="submit" className="btn save-btn" disabled={!isModified}>
+          Save Changes
+        </button>
       </form>
 
       <div className="settings-section danger-zone">
         <h3>Danger Zone</h3>
-        <p className="danger-warning">
-          These actions are irreversible. Please proceed with caution.
-        </p>
-        <button 
-          type="button" 
-          className="btn delete-btn"
-          onClick={handleDeleteAccount}
-        >
+        <button className="btn delete-btn" onClick={handleDeleteAccount}>
           Delete Account
         </button>
       </div>
 
       <div className="settings-section logout-section">
-        <button 
-          type="button" 
-          className="btn remove-btn"
-          onClick={handleLogout}
-        >
+        <button className="btn remove-btn" onClick={handleLogout}>
           Logout
         </button>
       </div>
     </div>
   );
 }
-
 export default Settings;
