@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from ..database import db
-from ..models import Growth
+from baby_backend.database import db
+from baby_backend.models import Growth
 
 growth_bp = Blueprint('growth_bp', __name__)
 

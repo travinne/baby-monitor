@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from ..database import db
-from ..models import Diaper
+from baby_backend.database import db
+from baby_backend.models import Diaper
 
 diaper_bp = Blueprint('diaper_bp', __name__)
 

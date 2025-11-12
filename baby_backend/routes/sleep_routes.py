@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..database import db
+from baby_backend.database import db
 from ..models import Sleep
 
 sleep_bp = Blueprint('sleep_bp', __name__)

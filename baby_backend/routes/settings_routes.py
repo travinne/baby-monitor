@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from ..database import db
-from ..models import UserSettings
+from baby_backend.database import db
+from baby_backend.models import UserSettings
 
 settings_bp = Blueprint("settings_bp", __name__, url_prefix="/settings")
 

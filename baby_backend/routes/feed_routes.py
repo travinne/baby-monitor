@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from ..database import db
-from ..models import Feeding
+from baby_backend.database import db
+from baby_backend.models import Feeding
 
 feed_bp = Blueprint('feed_bp', __name__)
 

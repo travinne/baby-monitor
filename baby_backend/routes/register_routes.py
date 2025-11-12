@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash
-from ..models import User
-from ..database import db
+from baby_backend.models import User
+from baby_backend.database import db
 import jwt
 import datetime
 

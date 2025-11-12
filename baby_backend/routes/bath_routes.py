@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from ..database import db
-from ..models import Bath
+from baby_backend.database import db
+from baby_backend.models import Bath
 
 bath_bp = Blueprint('bath_bp', __name__)
 

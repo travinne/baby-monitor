@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from app import db
-from ..models import Allergy
+from baby_backend.database import db
+from baby_backend.models import Allergy
 from datetime import datetime
 
 allergies_bp = Blueprint('allergies_bp', __name__)
